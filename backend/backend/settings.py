@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # 3rd-party apps
     'rest_framework',
+    'rest_framework_simplejwt',
     "corsheaders",
 
     # my apps
@@ -142,4 +143,16 @@ MEDIA_ROOT = 'static/images'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# OUR_SETTINGS--------------------|
+
+
+# cors_origin
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+# drf_system_setting
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}
