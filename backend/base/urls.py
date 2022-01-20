@@ -3,7 +3,8 @@ from . import views
 
 
 users_urls = [
-    path('login/', views.MyCreatorTokenView.as_view(), name='token-obtain-pair')
+    path('login/', views.MyCreatorTokenView.as_view(), name='token-obtain-pair'),
+    path('profile/', views.getUserProfile, name='users-profile')
 ]
 
 
