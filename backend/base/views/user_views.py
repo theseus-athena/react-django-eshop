@@ -34,6 +34,24 @@ def getUserProfile(request):
     return Response(serializer.data)
 
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateUserProfile(request):
+    user = request.user
+    data = request.data
+
+    user.first_name = data['name']
+    user.email = data['email']
+    user.username = data['email']
+
+    if data['password'] != '':
+        user.password = make_password(data['password'])
+
+    user.save()
+    serializer = UserSerializerWithToken(user, many=False)
+    return Response(serializer.data)
+
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def getUsers(request):
