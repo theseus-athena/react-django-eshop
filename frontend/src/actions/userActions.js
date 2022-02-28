@@ -59,9 +59,8 @@ export const userLoginAction = (email, password) => async (dispatch) => {
 
 export const userLogoutAction = () => (dispatch) => {
     localStorage.removeItem('userInfo')
-    dispatch({
-        type: USER_LOGOUT
-    })
+    dispatch({ type: USER_LOGOUT })
+    dispatch({ type: USER_DETAILS_RESET })
 }
 
 export const userRegisterAction = (name, email, password) => async (dispatch) => {
@@ -110,10 +109,6 @@ export const userRegisterAction = (name, email, password) => async (dispatch) =>
         })
     }
 }
-
-
-
-
 
 
 export const getUserDetailsAction = (id) => async (dispatch, getState) => {
