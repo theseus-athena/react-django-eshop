@@ -13,6 +13,11 @@ import {
     USER_DETAILS_SUCCESS,
     USER_DETAILS_FAIL,
     USER_DETAILS_RESET,
+
+    USER_UPDATE_PROFILE_REQUEST,
+    USER_UPDATE_PROFILE_SUCCESS,
+    USER_UPDATE_PROFILE_FAIL,
+    USER_UPDATE_PROFILE_RESET,
 } from '../constants/userConstants'
 
 import axios from 'axios'
@@ -148,6 +153,49 @@ export const getUserDetailsAction = (id) => async (dispatch, getState) => {
     }
 }
 
+export const updateUserProfileAction = (user) => async (dispatch, getState) => {
+    try {
+        dispatch({// USER_UPDATE_PROFILE_REQUEST
+            type: USER_UPDATE_PROFILE_REQUEST
+        })
+
+        const {// get token of userInfo
+            userLogin: { userInfo }
+        } = getState()
+
+        const config = { // request setting
+            headers: {
+                'Content-type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`
+            }
+        }
+
+        const { data } = await axios.put(// send update profile request
+            '/api/v1/users/profile/update/',
+            user,
+            config
+        )
+
+        dispatch({// USER_UPDATE_PROFILE_SUCCESS
+            type: USER_UPDATE_PROFILE_SUCCESS,
+            payload: data
+        })
+
+        dispatch({// USER_LOGIN_SUCCESS
+            type: USER_LOGIN_SUCCESS,
+            payload: data
+        })
+
+        localStorage.setItem('userInfo', JSON.stringify(data))
+    } catch (error) {
+        dispatch({// USER_UPDATE_PROFILE_FAIL
+            type: USER_UPDATE_PROFILE_FAIL,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message
+        })
+    }
+}
 
 
 
