@@ -3,8 +3,8 @@ import { Row, Col, Form, Button } from 'react-bootstrap'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserDetailsAction } from '../actions/userActions'
-
+import { getUserDetailsAction, updateUserProfileAction } from '../actions/userActions'
+import { USER_UPDATE_PROFILE_RESET } from '../constants/userConstants'
 function ProfileScreen({ history }) {
     // local states
     const [name, setName] = useState('')
@@ -20,20 +20,36 @@ function ProfileScreen({ history }) {
     const userDetails = useSelector(state => state.userDetails)
     const { user, error, loading } = userDetails
 
+    const userUpdateProfile = useSelector(state => state.userUpdateProfile)
+    const { success } = userUpdateProfile
+
     useEffect(() => {
         if (!userInfo) {
             history.push('/login')
         } else {
-            if (!user || !user.name) {
+            if (!user || !user.name || success) {
+                dispatch({ type: USER_UPDATE_PROFILE_RESET })
                 dispatch(getUserDetailsAction('profile'))
             } else {
                 setEmail(user.email)
                 setName(user.name)
             }
         }
-    }, [history, userInfo, user, dispatch])
+    }, [history, userInfo, user, dispatch, success])
 
-
+    const submitHandler = (e) => {
+        e.preventDefault()
+        if (password != confirmPassword) {
+            setMessage('Passwords do not match !')
+        } else {
+            dispatch(updateUserProfileAction({
+                'id': user._id,
+                'name': name,
+                'email': email,
+                'password': password
+            }))
+        }
+    }
     return (
         <Row>
             <Col md={3}>
@@ -41,7 +57,7 @@ function ProfileScreen({ history }) {
                 {error && <Message variant='danger' text={error} />}
                 {message && <Message variant='danger' text={message} />}
                 {loading && <Loader />}
-                <Form>
+                <Form onSubmit={submitHandler}>
                     <Form.Group controlId='name'>
                         <Form.Label>FullName</Form.Label>
                         <Form.Control
