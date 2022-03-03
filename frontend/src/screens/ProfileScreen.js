@@ -12,16 +12,38 @@ function ProfileScreen({ history }) {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [message, setMessage] = useState('')
+    const [successUpdate, setSuccessUpdate] = useState('')
 
     // handle getUserDetails
     const dispatch = useDispatch()
     const userLogin = useSelector(state => state.userLogin)
     const { userInfo } = userLogin
     const userDetails = useSelector(state => state.userDetails)
-    const { user, error, loading } = userDetails
+    const { user } = userDetails
+    const errorOfUserDetails = userDetails.error
+    const loadingOfUserDetails = userDetails.loading
 
     const userUpdateProfile = useSelector(state => state.userUpdateProfile)
     const { success } = userUpdateProfile
+    const errorOfUserUpdateProfile = userUpdateProfile.error
+    const loadingOfUserUpdateProfile = userUpdateProfile.loading
+
+    var loading = false
+    var error = ''
+
+    if (loadingOfUserDetails || loadingOfUserUpdateProfile) {
+        loading = true
+    }
+
+    if (errorOfUserDetails) {
+        error = errorOfUserDetails
+    } else if (errorOfUserUpdateProfile) {
+        error = errorOfUserUpdateProfile
+    }
+
+
+
+
 
     useEffect(() => {
         if (!userInfo) {
@@ -48,15 +70,23 @@ function ProfileScreen({ history }) {
                 'email': email,
                 'password': password
             }))
+            setMessage('')
+            setPassword('')
+            setConfirmPassword('')
+            setSuccessUpdate('Profile successfully updated !')
         }
     }
     return (
         <Row>
             <Col md={3}>
                 <h2>my profile</h2>
-                {error && <Message variant='danger' text={error} />}
-                {message && <Message variant='danger' text={message} />}
-                {loading && <Loader />}
+                {
+                    loading ? <Loader />
+                        : error ? <Message variant='danger' text={error} />
+                            : message ? <Message variant='danger' text={message} />
+                                : successUpdate ? <Message variant='success' text={successUpdate} />
+                                    : <></>
+                }
                 <Form onSubmit={submitHandler}>
                     <Form.Group controlId='name'>
                         <Form.Label>FullName</Form.Label>
