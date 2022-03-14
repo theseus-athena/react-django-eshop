@@ -147,6 +147,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # OUR_SETTINGS--------------------|
 
+# email_backend_settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # cors_origin
 CORS_ALLOW_ALL_ORIGINS = True
