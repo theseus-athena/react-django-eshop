@@ -8,10 +8,23 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.mail import EmailMessage
 
 
 def emailSender(data):
-    pass
+    try:
+        email = EmailMessage(
+            subject=data['subject'],
+            body=data['body'],
+            from_email='eshop.hamruyesh@gmail.com',
+            to=[data['to'], ]
+        )
+
+        email.send()
+        return True
+    except:
+        return False
 
 
 class MyCreatorTokenSerializer(TokenObtainPairSerializer):
@@ -79,8 +92,19 @@ def registerUser(request):
             is_active=False,
         )
 
-        # TODO: send activation email to user
-        data = {}
+        # create token
+        token = RefreshToken.for_user(user).access_token
+
+        # send activation email to user
+        subject = f"E-Shop Activation email"
+        body = f"Hi {user.username} welcome to E-Shop.\n Please use below link for active your account! \n\n" \
+            f"http://127.0.0.1:8000/api/v1/users/verify/{str(token)}/"
+
+        data = {
+            'subject': subject,
+            'body': body,
+            'to': user.email,
+        }
         result = emailSender(data)
 
         if result:
@@ -99,8 +123,19 @@ def registerUser(request):
 
         if user and not user.is_active:
 
-            # TODO: send activation email to user
-            data = {}
+            # create token
+            token = RefreshToken.for_user(user).access_token
+
+            # send activation email to user
+            subject = f"E-Shop Activation email"
+            body = f"Hi {user.username} welcome back to E-Shop.\n Please use below link for active your account! \n\n" \
+                f"http://127.0.0.1:8000/api/v1/users/verify/{str(token)}/"
+
+            data = {
+                'subject': subject,
+                'body': body,
+                'to': user.email,
+            }
             result = emailSender(data)
 
             if result:
