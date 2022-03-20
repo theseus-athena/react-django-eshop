@@ -1,15 +1,17 @@
-from tracemalloc import is_tracing
+from django.conf import settings
+from django.http import HttpResponseRedirect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from base.serializers import UserSerializer, UserSerializerWithToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMessage
+from rest_framework import status
+import jwt
 
 
 def emailSender(data):
@@ -82,6 +84,7 @@ def getUsers(request):
 def registerUser(request):
     data = request.data
     username = data['email']
+    password = data['password']
 
     try:
         user = User.objects.create(
@@ -121,6 +124,10 @@ def registerUser(request):
     except:
         user = User.objects.get(username=username)
 
+        # update the user's password
+        user.password = make_password(password)
+        user.save()
+
         if user and not user.is_active:
 
             # create token
@@ -140,7 +147,7 @@ def registerUser(request):
 
             if result:
                 message = {
-                    'detail': 'User with this email already exists but is not active. You should verify your email.Please check your Inbox. We sent an email.'
+                    'detail': 'User with this email already exists but is not active. You should verify your email.Please check your Inbox. We sent an email.Using new password'
                 }
                 return Response(message, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -150,6 +157,18 @@ def registerUser(request):
                 return Response(message, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         elif user and user.is_active:
             message = {
-                'detail': 'User with this email already exists and is active too. Please login.'
+                'detail': 'User with this email already exists and is active too. Please login.Using new password'
             }
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def verifyEmail(request, token):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, ['HS256'])
+        user = User.objects.get(id=payload['user_id'])
+        user.is_active = True
+        user.save()
+        return HttpResponseRedirect('http://localhost:3000/login?tokne=success')
+    except:
+        return HttpResponseRedirect('http://localhost:3000/login?token=fail')
