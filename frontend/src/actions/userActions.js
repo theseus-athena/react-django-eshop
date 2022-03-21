@@ -91,19 +91,7 @@ export const userRegisterAction = (name, email, password) => async (dispatch) =>
             payload: data
         })
 
-        dispatch({// USER_LOGIN_REQUEST
-            type: USER_LOGIN_REQUEST,
-        })
 
-        dispatch({// USER_LOGIN_SUCCESS
-            type: USER_LOGIN_SUCCESS,
-            payload: data
-        })
-
-        localStorage.setItem(
-            'userInfo',
-            JSON.stringify(data)
-        )
 
     } catch (error) {
         dispatch({// USER_REGISTER_FAIL
