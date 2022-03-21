@@ -9,7 +9,11 @@ import Message from '../components/Message'
 
 function LoginScreen({ location, history }) {
 
-    const redirect = location.search ? location.search.split('=')[1] : '/'
+    var redirect = location.search ? location.search.split('=')[1] : '/'
+    if (redirect !== '/') {
+        redirect = '/'
+    }
+    const tokenResult = location.search ? location.search.split('=')[1] : ""
 
     const dispatch = useDispatch()
     const userLogin = useSelector(state => state.userLogin)
@@ -17,6 +21,7 @@ function LoginScreen({ location, history }) {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [activationMessage, setActivationMessage] = useState('')
 
     const submitHandler = (e) => {
         e.preventDefault()
@@ -26,9 +31,23 @@ function LoginScreen({ location, history }) {
     useEffect(() => {
         if (userInfo) {
             history.push(redirect)
+        } else if (!userInfo) {
+            switch (tokenResult) {
+
+                case 'success':
+                    setActivationMessage('Your account successfully activated. Now you can login')
+                    break;
+
+                case 'fail':
+                    setActivationMessage('Your activation link isn\'t valid. Please go to register page and try again.')
+                    break;
+
+                default:
+                    setActivationMessage('')
+            }
         }
 
-    }, [history, userInfo, redirect])
+    }, [history, userInfo, redirect, tokenResult])
 
 
     return (
@@ -36,8 +55,13 @@ function LoginScreen({ location, history }) {
 
             <h1>sign in</h1>
 
-            {error && <Message variant='danger' text={error} />}
-            {loading && <Loader />}
+            {
+                loading ? <Loader />
+                    : error ? <Message variant='danger' text={error} />
+                        : tokenResult === 'success' ? <Message variant='success' text={activationMessage} />
+                            : tokenResult === 'fail' ? <Message variant='danger' text={activationMessage} />
+                                : <></>
+            }
             <Form onSubmit={submitHandler}>
                 <Form.Group controlId='email'>
                     <Form.Label>Email Address</Form.Label>

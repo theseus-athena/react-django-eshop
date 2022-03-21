@@ -18,6 +18,7 @@ function RegisterScreen({ location, history }) {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [message, setMessage] = useState('')
+    const [emailMessage, setEmailMessage] = useState('')
 
     // handle registe user
     const dispatch = useDispatch()
@@ -29,21 +30,30 @@ function RegisterScreen({ location, history }) {
             setMessage('Password and confirm password do not match !')
         } else {
             dispatch(userRegisterAction(name, email, password))
+            setName('')
+            setEmail('')
+            setPassword('')
+            setConfirmPassword('')
+            setMessage('')
         }
     }
 
     useEffect(() => {
-        if (userInfo) {
-            history.push(redirect)
+        if (userInfo && userInfo.detail) {
+            setEmailMessage(userInfo.detail)
         }
     }, [history, redirect, userInfo])
 
     return (
         <FormContainer>
             <h1>sign up</h1>
-            {error && <Message variant='danger' text={error} />}
-            {message && <Message variant='danger' text={message} />}
-            {loading && <Loader />}
+            {
+                loading ? <Loader />
+                    : error ? <Message variant='danger' text={error} />
+                        : emailMessage ? <Message variant='warning' text={emailMessage} />
+                            : message ? <Message variant='danger' text={message} />
+                                : <></>
+            }
             <Form onSubmit={submitHandler}>
                 <Form.Group controlId='name'>
                     <Form.Label>FullName</Form.Label>
