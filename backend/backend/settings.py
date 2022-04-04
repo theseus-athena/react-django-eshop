@@ -148,7 +148,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # OUR_SETTINGS--------------------|
 
 # email_backend_settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'your gmail\'s account'
+EMAIL_HOST_PASSWORD = 'your gmail\'s password'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 # cors_origin
 CORS_ALLOW_ALL_ORIGINS = True
