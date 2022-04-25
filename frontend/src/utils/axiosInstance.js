@@ -6,7 +6,7 @@ import { updateAccessToken } from '../actions/userActions';
 
 
 const baseURL = 'http://127.0.0.1:8000'
-const axiosIntance = (userInfo, dispatch) => {
+const axiosInstance = (userInfo, dispatch) => {
 
     const instance = axios.create({
         baseURL,
@@ -38,4 +38,4 @@ const axiosIntance = (userInfo, dispatch) => {
     return instance
 }
 
-export default axiosIntance;
+export default axiosInstance;

@@ -3,7 +3,7 @@ import { Row, Col, Form, Button } from 'react-bootstrap'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserDetailsAction, updateUserProfileAction } from '../actions/userActions'
+import { getUserDetailsAction, updateUserProfileAction, userLogoutAction } from '../actions/userActions'
 import { USER_UPDATE_PROFILE_RESET } from '../constants/userConstants'
 function ProfileScreen({ history }) {
     // local states
@@ -41,11 +41,15 @@ function ProfileScreen({ history }) {
         error = errorOfUserUpdateProfile
     }
 
-
+    const TE = "Token is invalid or expired"
 
 
 
     useEffect(() => {
+        if (errorOfUserDetails === TE || errorOfUserUpdateProfile === TE) {
+            dispatch(userLogoutAction())
+            history.push('/login?redirect=/profile')
+        }
         if (!userInfo) {
             history.push('/login')
         } else {
@@ -57,7 +61,7 @@ function ProfileScreen({ history }) {
                 setName(user.name)
             }
         }
-    }, [history, userInfo, user, dispatch, success])
+    }, [history, userInfo, user, dispatch, success, errorOfUserDetails, errorOfUserUpdateProfile])
 
     const submitHandler = (e) => {
         e.preventDefault()
