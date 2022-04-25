@@ -21,6 +21,7 @@ import {
 } from '../constants/userConstants'
 
 import axios from 'axios'
+import axiosInstance from '../utils/axiosInstance'
 
 
 export const userLoginAction = (email, password) => async (dispatch) => {
@@ -62,11 +63,13 @@ export const userLoginAction = (email, password) => async (dispatch) => {
 
 }
 
+
 export const userLogoutAction = () => (dispatch) => {
     localStorage.removeItem('userInfo')
     dispatch({ type: USER_LOGOUT })
     dispatch({ type: USER_DETAILS_RESET })
 }
+
 
 export const userRegisterAction = (name, email, password) => async (dispatch) => {
     try {
@@ -110,21 +113,11 @@ export const getUserDetailsAction = (id) => async (dispatch, getState) => {
             type: USER_DETAILS_REQUEST
         })
 
-        const {
-            userLogin: { userInfo }
-        } = getState()
+        const { userLogin: { userInfo } } = getState()
 
-
-        const config = {
-            headers: {
-                'Content-type': 'application/json',
-                Authorization: `Bearer ${userInfo.token}`
-            }
-        }
-
-        const { data } = await axios.get(
+        const authRequestAxios = axiosInstance(userInfo, dispatch)
+        const { data } = await authRequestAxios.get(
             `/api/v1/users/${id}`,
-            config,
         )
 
         dispatch({// USER_DETAILS_SUCCESS
@@ -141,40 +134,34 @@ export const getUserDetailsAction = (id) => async (dispatch, getState) => {
     }
 }
 
+
 export const updateUserProfileAction = (user) => async (dispatch, getState) => {
     try {
         dispatch({// USER_UPDATE_PROFILE_REQUEST
             type: USER_UPDATE_PROFILE_REQUEST
         })
 
-        const {// get token of userInfo
-            userLogin: { userInfo }
-        } = getState()
+        const { userLogin: { userInfo } } = getState()
 
-        const config = { // request setting
-            headers: {
-                'Content-type': 'application/json',
-                Authorization: `Bearer ${userInfo.token}`
-            }
-        }
 
-        const { data } = await axios.put(// send update profile request
+        const authRequestAxios = axiosInstance(userInfo, dispatch)
+        const { data } = await authRequestAxios.put(// send update profile request
             '/api/v1/users/profile/update/',
             user,
-            config
         )
+        userInfo.name = data.name
 
         dispatch({// USER_UPDATE_PROFILE_SUCCESS
             type: USER_UPDATE_PROFILE_SUCCESS,
-            payload: data
+            payload: userInfo
         })
 
         dispatch({// USER_LOGIN_SUCCESS
             type: USER_LOGIN_SUCCESS,
-            payload: data
+            payload: userInfo
         })
 
-        localStorage.setItem('userInfo', JSON.stringify(data))
+        localStorage.setItem('userInfo', JSON.stringify(userInfo))
     } catch (error) {
         dispatch({// USER_UPDATE_PROFILE_FAIL
             type: USER_UPDATE_PROFILE_FAIL,
@@ -183,6 +170,17 @@ export const updateUserProfileAction = (user) => async (dispatch, getState) => {
                 : error.message
         })
     }
+}
+
+
+export const updateAccessToken = (obj) => (dispatch, getState) => {
+    const { userLogin: { userInfo } } = getState()
+
+    userInfo.access = obj.access
+    userInfo.refresh = obj.refresh
+
+    dispatch({ type: USER_LOGIN_SUCCESS, payload: userInfo })
+    localStorage.setItem('userInfo', JSON.stringify(userInfo))
 }
 
 
