@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from base.serializers import UserSerializer, UserSerializerWithToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -27,6 +27,9 @@ def emailSender(data):
         return True
     except:
         return False
+    
+class MyTokenRefreshView(TokenRefreshView):
+    throttle_scope = 'refresh_token'
 
 
 class MyCreatorTokenSerializer(TokenObtainPairSerializer):

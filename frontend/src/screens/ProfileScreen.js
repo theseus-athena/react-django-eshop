@@ -135,6 +135,7 @@ function ProfileScreen({ history }) {
                     <Button
                         type='submit'
                         className='my-4 col-6'
+                        disabled={loading === true}
                     >
                         update
                     </Button>
