@@ -9,7 +9,10 @@ import Message from '../components/Message'
 
 function LoginScreen({ location, history }) {
 
-    const redirect = location.search ? location.search.split('=')[1] : '/'
+    var redirect = location.search ? location.search.split('=')[1] : '/'
+    if (redirect === 'success' || redirect === 'fail') {
+        redirect = '/'
+    }
     const tokenResult = location.search ? location.search.split('=')[1] : ""
 
     const dispatch = useDispatch()
