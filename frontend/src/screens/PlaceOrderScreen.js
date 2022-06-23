@@ -1,12 +1,21 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Row, Col, Button, Image, ListGroup, Card } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import CheckoutSteps from '../components/CheckoutSteps'
 import Message from '../components/Message'
-import { useSelector } from 'react-redux'
+import Loader from '../components/Loader'
+import { useSelector, useDispatch } from 'react-redux'
+import { createOrder } from '../actions/orderActions'
+import { ORDER_CREATE_RESET } from '../constants/orderConstants'
 
 
-function PlaceOrderScreen() {
+function PlaceOrderScreen({ history }) {
+
+    const dispatch = useDispatch()
+
+    const orderCreate = useSelector(state => state.orderCreate)
+    const { success, order, error, loading } = orderCreate
+
     const cart = useSelector(state => state.cart)
 
     cart.itemsPrice = cart.cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toFixed(2)
@@ -14,8 +23,26 @@ function PlaceOrderScreen() {
     cart.taxPrice = Number((0.082) * cart.itemsPrice).toFixed(2)
     cart.totalPrice = (Number(cart.itemsPrice) + Number(cart.shippingPrice) + Number(cart.taxPrice)).toFixed(2)
 
+
+    useEffect(() => {
+        if (success) {
+            history.push(`/order/${order._id}`)
+            dispatch({ type: ORDER_CREATE_RESET })
+        }
+    }, [success, history])
+
+
+
     const placeOrder = () => {
-        console.log('Place Order')
+        dispatch(createOrder({
+            orderItems: cart.cartItems,
+            shippingAddress: cart.shippingAddress,
+            paymentMethod: cart.paymentMethod,
+            itemsPrice: cart.itemsPrice,
+            shippingPrice: cart.shippingPrice,
+            taxPrice: cart.taxPrice,
+            totalPrice: cart.totalPrice,
+        }))
     }
 
     return (
@@ -109,6 +136,17 @@ function PlaceOrderScreen() {
                                 </Row>
                             </ListGroup.Item>
 
+                            {
+                                loading ?
+                                    <ListGroup.Item>
+                                        <Loader />
+                                    </ListGroup.Item>
+                                    : error ?
+                                        <ListGroup.Item>
+                                            <Message variant='danger' text={error} />
+                                        </ListGroup.Item>
+                                        : <></>
+                            }
                             <ListGroup.Item>
                                 <Button
                                     type='button'
