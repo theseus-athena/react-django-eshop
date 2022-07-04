@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Row, Col, Form, Button } from 'react-bootstrap'
+import { Row, Col, Form, Button, Table } from 'react-bootstrap'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
 import { useSelector, useDispatch } from 'react-redux'
 import { getUserDetailsAction, updateUserProfileAction, userLogoutAction } from '../actions/userActions'
 import { USER_UPDATE_PROFILE_RESET } from '../constants/userConstants'
+import { LinkContainer } from 'react-router-bootstrap'
+import { getMyOrderList } from '../actions/orderActions'
+
+
 function ProfileScreen({ history }) {
+    const dispatch = useDispatch()
+
     // local states
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -15,30 +21,35 @@ function ProfileScreen({ history }) {
     const [successUpdate, setSuccessUpdate] = useState('')
 
     // handle getUserDetails
-    const dispatch = useDispatch()
     const userLogin = useSelector(state => state.userLogin)
     const { userInfo } = userLogin
+
+
     const userDetails = useSelector(state => state.userDetails)
-    const { user } = userDetails
-    const errorOfUserDetails = userDetails.error
-    const loadingOfUserDetails = userDetails.loading
+    const { user, error: errorUserDetails, loading: loadingUserDetails } = userDetails
+
 
     const userUpdateProfile = useSelector(state => state.userUpdateProfile)
-    const { success } = userUpdateProfile
-    const errorOfUserUpdateProfile = userUpdateProfile.error
-    const loadingOfUserUpdateProfile = userUpdateProfile.loading
+    const { success, error: errorUpdateProfile, loading: loadingUpdateProfile } = userUpdateProfile
 
-    var loading = false
-    var error = ''
 
-    if (loadingOfUserDetails || loadingOfUserUpdateProfile) {
+    // handle getMyOrderList
+    const orderListMy = useSelector(state => state.orderListMy)
+    const { orders, error: errorOrders, loading: loadingOrders } = orderListMy
+
+
+    // handle loading and error
+    let loading = false
+    let error = ''
+
+    if (loadingUserDetails || loadingUpdateProfile) {
         loading = true
     }
 
-    if (errorOfUserDetails) {
-        error = errorOfUserDetails
-    } else if (errorOfUserUpdateProfile) {
-        error = errorOfUserUpdateProfile
+    if (errorUserDetails) {
+        error = errorUserDetails
+    } else if (errorUpdateProfile) {
+        error = errorUpdateProfile
     }
 
     const TE = "Token is invalid or expired"
@@ -46,7 +57,7 @@ function ProfileScreen({ history }) {
 
 
     useEffect(() => {
-        if (errorOfUserDetails === TE || errorOfUserUpdateProfile === TE) {
+        if (errorUserDetails === TE || errorUpdateProfile === TE) {
             dispatch(userLogoutAction())
             history.push('/login?redirect=/profile')
         }
@@ -56,16 +67,17 @@ function ProfileScreen({ history }) {
             if (!user || !user.name || success) {
                 dispatch({ type: USER_UPDATE_PROFILE_RESET })
                 dispatch(getUserDetailsAction('profile'))
+                dispatch(getMyOrderList())
             } else {
                 setEmail(user.email)
                 setName(user.name)
             }
         }
-    }, [history, userInfo, user, dispatch, success, errorOfUserDetails, errorOfUserUpdateProfile])
+    }, [history, userInfo, user, dispatch, success, errorUserDetails, errorUpdateProfile])
 
     const submitHandler = (e) => {
         e.preventDefault()
-        if (password != confirmPassword) {
+        if (password !== confirmPassword) {
             setMessage('Passwords do not match !')
         } else {
             dispatch(updateUserProfileAction({
@@ -141,8 +153,70 @@ function ProfileScreen({ history }) {
                     </Button>
                 </Form>
             </Col>
-            <Col md={8}>
+            <Col md={9}>
                 <h2>my orders</h2>
+                {
+                    loadingOrders ? (
+                        <Loader />
+                    ) : errorOrders ? (
+                        <Message variant='danger' text={errorOrders} />
+                    ) : orders && orders.length === 0 ? (
+                        <Message variant='warning' text='There is no any order !' />
+                    ) : (
+                        <Table striped responsive className='table-sm text-center'>
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>date</th>
+                                    <th>total</th>
+                                    <th>paid</th>
+                                    <th>delivered</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {
+                                    orders.map(order => (
+                                        <tr
+                                            key={order._id}
+                                            className={order.isPaid && order.isDelivered ? 'bg-success text-white' : ''}
+                                        >
+                                            <td>#{order._id}</td>
+                                            <td>{order.createdAt.substring(0, 10)}</td>
+                                            <td>$ {order.totalPrice}</td>
+                                            <td>
+                                                {
+                                                    order.isPaid ?
+                                                        order.paidAt.substring(0, 10) : (
+                                                            <i className='fas fa-times text-danger'></i>
+                                                        )
+                                                }
+                                            </td>
+                                            <td>
+                                                {
+                                                    order.isDelivered ?
+                                                        order.deliveredAt.substring(0, 10) : (
+                                                            <i className='fas fa-times text-danger'></i>
+                                                        )
+                                                }
+                                            </td>
+                                            <td>
+                                                <LinkContainer to={`/order/${order._id}`}>
+                                                    <Button
+                                                        className='btn-sm'
+                                                    >
+                                                        details
+                                                    </Button>
+                                                </LinkContainer>
+                                            </td>
+                                        </tr>
+                                    ))
+                                }
+                            </tbody>
+                        </Table>
+                    )
+                }
             </Col>
         </Row>
     )
