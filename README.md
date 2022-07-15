@@ -11,3 +11,5 @@
 [##Chapter 5: Authentication System Back-end](https://hamruyesh.com/product/django-python-react-ecommerce-tutorial-part5-cart/)
 
 [##Chapter 6: User authentication](https://hamruyesh.com/product/build-full-stack-store-with-django-and-react-tutorial-part6/)
+
+[##Chapter 7: Register Order](https://hamruyesh.com/product/build-full-stack-store-with-django-and-react-tutorial-order-part7/)
