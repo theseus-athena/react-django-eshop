@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { getOrderDetails } from '../actions/orderActions'
 import { Row, Col, Button, Image, ListGroup, Card } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
+import { goPayGate } from '../actions/orderActions'
+import axiosInstance from '../utils/axiosInstance'
 
 
 function OrderScreen({ match }) {
@@ -22,6 +24,31 @@ function OrderScreen({ match }) {
       dispatch(getOrderDetails(orderId))
     }
   }, [order, orderId, dispatch])
+
+
+  // handle pay order
+
+  const [payGateMessage, setPayGateMessage] = useState('')
+
+  const userLogin = useSelector(state => state.userLogin)
+  const { userInfo } = userLogin
+
+  const authRequestAxios = axiosInstance(userInfo, dispatch)
+
+  const payOrderHandler = () => {
+    goPayGate(authRequestAxios, orderId)
+      .then((response) => {
+        console.log(response)
+      })
+      .catch((error) => {
+        if (error.response.data && error.response.data.detail) {
+          setPayGateMessage(error.response.data.detail)
+        } else {
+          setPayGateMessage(error.response.data)
+        }
+      })
+  }
+
 
   return loading ? (
     <Loader />
@@ -146,6 +173,21 @@ function OrderScreen({ match }) {
                   <Col>Total: </Col>
                   <Col>$ {order.totalPrice}</Col>
                 </Row>
+              </ListGroup.Item>
+
+              <ListGroup.Item
+                className={payGateMessage ? '' : 'd-none'}
+              >
+                <Message variant='danger' text={payGateMessage} />
+              </ListGroup.Item>
+
+              <ListGroup.Item
+                className={order.isPaid ? 'd-none' : ''}
+              >
+                <Button
+                  type='button'
+                  onClick={payOrderHandler}
+                >pay order</Button>
               </ListGroup.Item>
             </ListGroup>
 

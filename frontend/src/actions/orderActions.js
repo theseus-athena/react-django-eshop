@@ -93,3 +93,12 @@ export const getMyOrderList = () => async (dispatch, getState) => {
         })
     }
 }
+
+
+export const goPayGate = (authRequestAxios, id) => {
+
+    const response = authRequestAxios.get(
+        `/api/v1/orders/${id}/pay/`,
+    )
+    return response
+}
