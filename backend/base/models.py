@@ -83,3 +83,24 @@ class ShippingAddress(models.Model):
 
     def __str__(self):
         return str(self.address)
+
+
+class Idpay(models.Model):
+    _id = models.AutoField(primary_key=True, editable=False)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    transId = models.CharField(max_length=50, unique=True) # کلید منحصر بفرد تراکنش
+    lastStatus = models.IntegerField(null=True, blank=True) # کد آخرین وضعیت تراکنش
+    trackIdpay = models.IntegerField(null=True, blank=True) # کد رهگیری آیدی پی
+    trackShaparak = models.CharField(max_length=50, null=True, blank=True) # کد رهگیری شاپرک
+    amountCreate = models.IntegerField(null=True, blank=True) # مبلغ ثبت شده هنگام ایجاد
+    amountPaid = models.IntegerField(null=True, blank=True) # مبلغ پرداخت شده
+    createdAt = models.DateTimeField(auto_now_add=True) # زمان ایجاد تراکنش
+    dateUpdate = models.DateTimeField(auto_now=True) # زمان آخرین بروز رسانی
+    dateShaparak = models.DateTimeField(null=True, blank=True) # زمان انجام تراکنش
+    dateVerify = models.DateTimeField(null=True, blank=True) # زمان تایید تراکنش
+    cardNo = models.CharField(max_length=30, null=True, blank=True) # شماره کارت پرداخت کننده
+    
+    
+    def __str__(self):
+        return str(self.transId)
