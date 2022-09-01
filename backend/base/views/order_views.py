@@ -84,3 +84,34 @@ def getOrderById(request,pk):
     except:
         return Response({'detail':'Order does not exist !'},
                         status=status.HTTP_404_NOT_FOUND)     
+        
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def payOrder(request,pk):
+    user = request.user
+    
+    try:
+        order = Order.objects.get(_id=pk)
+    except Order.DoesNotExist:
+        return Response({'detail':'Order not found !'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        
+        if order.isPaid:
+            return Response({'detail':'Order has already been paid !'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                response = idpayCreatePay(user,order)
+            except:
+                return Response({'detail':'The idpay server connection was not established !'},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                
+                if(str(response.status_code).startswith('2')):
+                    resJson = response.json()
+                    if(idpayCreateDB(user, order, resJson['id'])):
+                        return Response(resJson, status=status.HTTP_200_OK)
+                    else:
+                        return Response({'detail':'db error !'},
+                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
