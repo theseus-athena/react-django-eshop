@@ -24,3 +24,4 @@ yarn-error.log*
 
 shopenv/
 __pycache__/
+X_API_KEY.py
