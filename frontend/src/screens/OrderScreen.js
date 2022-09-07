@@ -38,7 +38,7 @@ function OrderScreen({ match }) {
   const payOrderHandler = () => {
     goPayGate(authRequestAxios, orderId)
       .then((response) => {
-        console.log(response)
+        window.location.assign(response.data.link)
       })
       .catch((error) => {
         if (error.response.data && error.response.data.detail) {

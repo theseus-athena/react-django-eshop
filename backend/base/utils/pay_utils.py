@@ -1,5 +1,6 @@
 import requests, json
-from X_API_KEY import X_API_KEY
+
+from base.utils.X_API_KEY import X_API_KEY
 from base.models import Idpay
 
 IDPAY_HEADER = {
@@ -12,7 +13,7 @@ IDPAY_HEADER = {
 def idpayCreatePay(user, order):
     body = {
         'order_id' : str(order._id),
-        'amount': (order.totalPrice * 10),
+        'amount': int(order.totalPrice * 10),
         'mail' : user.email,
         'callback' : 'http://127.0.0.1:8000/api/v1/air/result/'
     }
