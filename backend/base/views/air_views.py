@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from base.models import Idpay, Order
+from base.utils.pay_utils import idpayUpdateDB, idpayVerify
 
 from django.http import HttpResponseRedirect
 @api_view(['POST'])
@@ -26,6 +27,23 @@ def IdPayCallBack(request):
         return Response({'detail':'Transaction processing error !'}, status=status.HTTP_400_BAD_REQUEST)
     
     else:
-        # TODO: Transaction verify
-        pass
+        # Transaction verify
+        if(str(callBackPayStatus) == '10'):
+            try:
+                response = idpayVerify(transId, order_id)
+            except:
+                dbStatus = idpayUpdateDB(pay_entry, 500, trackIdpay)
+                return HttpResponseRedirect(f"http://localhost:3000/payresult/{trackIdpay}/{order_id}/{transId}?db={dbStatus}")
+            else:
+                
+                if(str(response.status_code).startswith('2')):
+                    resJson = response.json()
+                    dbStatus = idpayCompleteDB(resJson)
+                    return HttpResponseRedirect(f"http://localhost:3000/payresult/{trackIdpay}/{order_id}/{transId}?db={dbStatus}")
+                else:
+                    dbStatus = idpayUpdateDB(pay_entry, 400, trackIdpay)
+                    return HttpResponseRedirect(f"http://localhost:3000/payresult/{trackIdpay}/{order_id}/{transId}?db={dbStatus}")
+        else:
+            dbStatus = idpayUpdateDB(pay_entry, callBackPayStatus, trackIdpay)
+            return HttpResponseRedirect(f"http://localhost:3000/payresult/{trackIdpay}/{order_id}/{transId}?db={dbStatus}")
         
