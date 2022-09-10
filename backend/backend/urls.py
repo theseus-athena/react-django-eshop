@@ -22,6 +22,7 @@ urls = [
     path('products/', include('base.urls.product_urls')),
     path('users/', include('base.urls.user_urls')),
     path('orders/', include('base.urls.order_urls')),
+    path('air/', include('base.urls.air_urls')),
 ]
 
 urlpatterns = [
