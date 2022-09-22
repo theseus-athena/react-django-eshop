@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from base.models import Idpay, Order
-from base.utils.pay_utils import idpayUpdateDB, idpayVerify
+from base.utils.pay_utils import idpayUpdateDB, idpayVerify, idpayCompleteDB
 
 from django.http import HttpResponseRedirect
 @api_view(['POST'])
