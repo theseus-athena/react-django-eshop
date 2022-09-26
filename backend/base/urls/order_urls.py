@@ -8,4 +8,5 @@ urlpatterns = [
     
     path('<str:pk>/',views.getOrderById,name='user-order'),
     path('<str:pk>/pay/',views.payOrder,name='pay-order'),
+    path('<str:pk>/inquirypay/', views.inquiryPay, name='inquiry-pay')
 ]
