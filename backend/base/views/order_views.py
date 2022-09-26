@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from base.models import Product,Order,OrderItem,ShippingAddress, Idpay
 from base.serializers import OrderSerializer
-from base.utils.pay_utils import idpayCreateDB, idpayCreatePay, makeInquiryPayResult
+from base.utils.pay_utils import idpayCreateDB, idpayUpdateDB, idpayInquiry, idpayCreatePay, makeInquiryPayResult
 
 
 @api_view(['POST'])
@@ -138,6 +138,14 @@ def inquiryPay(request, pk):
             else:
                 return Response({'detail':'Transaction details are not valid!'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            # TODO: Transaction inquiry
-            pass
+            # Transaction inquiry
+            try:
+                response = idpayInquiry(transId, order._id)
+            except:
+                if(idpayUpdateDB(pay_entry, 500, track_id)):
+                    return Response(makeInquiryPayResult(500, order._id, track_id), status=status.HTTP_200_OK)
+                else:
+                    return Response({'detail':'Registration ERROR!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                pass
             

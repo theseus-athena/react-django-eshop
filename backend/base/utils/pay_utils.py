@@ -51,6 +51,21 @@ def idpayVerify(transId, order_id):
     return response
 
 
+def idpayInquiry(transId, order_id):
+    body = {
+        'id': str(transId),
+        'order_id': str(order_id)
+    }
+    
+    response = requests.post(
+        'https://api.idpay.ir/v1.1/payment/inquiry',
+        data=json.dumps(body),
+        headers=IDPAY_HEADER
+    )
+    
+    return response
+
+
 def idpayCreateDB(user, order, id):
     try:
         # ایجاد یک موجودیت جدید در جدول تراکنش ها با ثبت آی دی آن
