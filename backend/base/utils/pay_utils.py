@@ -1,6 +1,7 @@
 import requests, json
 
 from base.utils.X_API_KEY import X_API_KEY
+from base.utils.IDPAY_STATUS import IDPAY_STATUS
 from base.models import Idpay, Order
 
 from datetime import datetime, timezone
@@ -105,3 +106,27 @@ def idpayCompleteDB(data):
         return True
     except:
         return False      
+    
+
+def makeInquiryPayResult(lastStatus, order_id, track_id):
+    msg = ""
+    success = False
+    
+    if lastStatus == 100 or lastStatus == 101 or lastStatus == 200:
+        success = True
+        
+    for k,v in IDPAY_STATUS.items():
+        if k == lastStatus:
+            msg = v
+            
+    if msg == "":
+        msg = "Transaction status Unknown!"
+    
+    return {
+        'message': msg, 
+        'success': success,
+        'status': lastStatus,
+        'order_id': order_id,
+        'track_id': track_id,
+    }
+            
