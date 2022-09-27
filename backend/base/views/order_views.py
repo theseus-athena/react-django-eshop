@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from base.models import Product,Order,OrderItem,ShippingAddress, Idpay
 from base.serializers import OrderSerializer
-from base.utils.pay_utils import idpayCreateDB, idpayUpdateDB, idpayInquiry, idpayCreatePay, makeInquiryPayResult
+from base.utils.pay_utils import idpayCreateDB, idpayUpdateDB, idpayCompleteDB, idpayInquiry, idpayCreatePay, makeInquiryPayResult
 
 
 @api_view(['POST'])
@@ -145,7 +145,31 @@ def inquiryPay(request, pk):
                 if(idpayUpdateDB(pay_entry, 500, track_id)):
                     return Response(makeInquiryPayResult(500, order._id, track_id), status=status.HTTP_200_OK)
                 else:
-                    return Response({'detail':'Registration ERROR!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response({'detail':'REGISTRATION_ERROR!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
-                pass
+                if(str(response.status_code).startswith('2')):
+                    try:
+                        resJson = response.json()
+                        lastStatus = resJson['status']
+                    except:
+                        if(idpayUpdateDB(pay_entry, 500, track_id)):
+                            return Response(makeInquiryPayResult(500, order._id, track_id), status=status.HTTP_200_OK)
+                        else:
+                            return Response({'detail':'REGISTRATION_ERROR!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    else:
+                        if(lastStatus == 100 or lastStatus == 101 or lastStatus == 200):
+                            if(idpayCompleteDB(resJson)):
+                                return Response(makeInquiryPayResult(lastStatus, order._id, track_id), status=status.HTTP_200_OK)
+                            else:
+                                return Response({'detail':'REGISTRATION_PAYMENT_CONFIRMED_ERROR!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        else:
+                            if(idpayUpdateDB(pay_entry, lastStatus, track_id)):
+                                return Response(makeInquiryPayResult(lastStatus, order._id, track_id), status=status.HTTP_200_OK)
+                            else:
+                                return Response({'detail':'PAYMENT_IS_NOT_COMPLETE!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    if(idpayUpdateDB(pay_entry, 500, track_id)):
+                        return Response(makeInquiryPayResult(500, order._id, track_id), status=status.HTTP_200_OK)
+                    else:
+                        return Response({'detail':'REGISTRATION_ERROR!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
