@@ -133,7 +133,7 @@ def inquiryPay(request, pk):
         return Response({'detail':'Transaction details not found!'}, status=status.HTTP_404_NOT_FOUND)
     else:
         if(pay_entry.trackIdpay and pay_entry.lastStatus != 0):
-            if(str(pay_entry.trackIdpay) == str(track_id)):
+            if(str(pay_entry.trackIdpay) == str(track_id) and pay_entry.order == order):
                 return Response(makeInquiryPayResult(pay_entry.lastStatus, order._id, track_id), status=status.HTTP_200_OK)
             else:
                 return Response({'detail':'Transaction details are not valid!'}, status=status.HTTP_400_BAD_REQUEST)

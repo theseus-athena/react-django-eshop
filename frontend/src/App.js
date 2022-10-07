@@ -33,7 +33,7 @@ function App() {
           <Route path='/order/:id' component={OrderScreen} />
           <Route path='/product/:id' component={ProductScreen} />
           <Route path='/cart/:id?' component={CartScreen} />
-          <PrivateRoute path='/payresult' component={PayResultScreen} />
+          <PrivateRoute path='/payresult/:trackId/:oid/:transId' component={PayResultScreen} />
         </Container>
       </main>
       <Footer />
