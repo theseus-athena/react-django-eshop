@@ -13,3 +13,5 @@
 [##Chapter 6: User authentication](https://hamruyesh.com/product/build-full-stack-store-with-django-and-react-tutorial-part6/)
 
 [##Chapter 7: Register Order](https://hamruyesh.com/product/build-full-stack-store-with-django-and-react-tutorial-order-part7/)
+
+[##Chapter 8: Payment Gateway](https://hamruyesh.com/product/build-full-stack-store-with-django-and-react-tutorial-payment-gateway-part8-hamruyesh-com/)
